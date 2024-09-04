@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --height-header: 3.5rem;
+  --height-main: calc(100vh - 3.5rem);
+
+  font-family: Inter, theme(fontFamily.sans);
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1; /* fix for Chrome */
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: InterVariable, theme(fontFamily.sans);
+  }
+}
