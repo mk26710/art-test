@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import IconChevronLeft from "~/components/icons/mini/IconChevronLeft.vue";
 import IconChevronRight from "~/components/icons/mini/IconChevronRight.vue";
+import TailSpin from "~/components/icons/TailSpin.vue";
 import Main from "~/components/Main.vue";
 import { paginatorWindow } from "~/lib/paginator-window";
 
@@ -12,75 +13,87 @@ const postsStore = usePostsStore();
 await postsStore.getPosts();
 await postsStore.selectPage(pageQuery ?? 1);
 
+const { page, pagePosts, posts, isFetching } = storeToRefs(postsStore);
+
 const clickablePages = computed(() =>
   paginatorWindow({
-    currentPage: postsStore.page,
-    maxPage: postsStore.posts.length,
+    currentPage: page.value,
+    maxPage: posts.value.length,
+    windowSize: 5,
   }),
 );
 
 const updatePage = async (newPage: number) => {
-  indicator.start();
-
-  postsStore
-    .selectPage(newPage)
-    .then(() => {
-      void router.push({ query: { page: newPage } });
-    })
-    .finally(() => {
-      indicator.finish();
-    });
+  postsStore.selectPage(newPage).then(() => {
+    void router.push({ query: { page: newPage } });
+  });
 };
 
 const prevPage = () => {
-  if (pageQuery != null) {
-    void updatePage(postsStore.page - 1);
-  }
+  void updatePage(page.value - 1);
 };
 
 const nextPage = () => {
-  if (pageQuery != null) {
-    void updatePage(postsStore.page + 1);
-  }
+  void updatePage(page.value + 1);
 };
+
+watch(
+  () => isFetching.value,
+  (newValue) => {
+    if (newValue === true) {
+      indicator.start();
+    } else {
+      indicator.finish();
+    }
+  },
+);
 </script>
 
 <template>
   <Main>
-    <div class="container max-w-screen-lg flex flex-col items-center py-4">
-      <div class="w-full overflow-auto relative">
-        <table class="w-full caption-bottom text-sm">
+    <div class="container flex max-w-screen-lg flex-col items-center py-4">
+      <div :data-fetching="isFetching" class="group relative grid w-full grid-cols-1 overflow-auto">
+        <table class="w-full caption-bottom overflow-hidden text-sm">
           <thead>
-            <tr class="transition-colors bg-neutral-800 font-bold text-white">
-              <th class="h-12 px-4 text-left align-middle w-[90px]">ID</th>
-              <th class="h-12 px-4 text-left align-middle w-[90px]">User ID</th>
-              <th class="h-12 px-4 text-left align-middle w-[250px]">Title</th>
-              <th class="h-12 px-4 align-middle text-left">Body</th>
+            <tr class="border-x border-black bg-black font-bold text-white transition-colors">
+              <th class="h-12 w-[90px] px-4 text-left align-middle">ID</th>
+              <th class="h-12 w-[90px] px-4 text-left align-middle">User ID</th>
+              <th class="h-12 w-[250px] px-4 text-left align-middle">Title</th>
+              <th class="h-12 px-4 text-left align-middle">Body</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody
+            class="group-data-[fetching=true]:opacity-45 group-data-[fetching=true]:blur-[2px]"
+          >
             <tr
-              v-for="post in postsStore.pagePosts"
+              v-for="post in pagePosts"
               :key="'post:' + post.id"
-              class="transition-colors hover:bg-neutral-100 even:hover:bg-neutral-200 even:bg-neutral-100"
+              class="border-x transition-colors even:bg-neutral-100 hover:bg-neutral-100 even:hover:bg-neutral-200"
             >
               <td class="p-4 align-middle">{{ post.id }}</td>
               <td class="p-4 align-middle">{{ post.userId }}</td>
               <td class="p-4 align-middle">
-                <span class="truncate line-clamp-2 text-wrap">{{ post.title }}</span>
+                <span class="line-clamp-2 truncate text-wrap">{{ post.title }}</span>
               </td>
               <td class="p-4 align-middle">
-                <span class="truncate line-clamp-2 text-wrap text-justify">{{ post.body }}</span>
+                <span class="line-clamp-2 truncate text-wrap text-justify">{{ post.body }}</span>
               </td>
             </tr>
           </tbody>
         </table>
+
+        <div
+          v-if="isFetching"
+          class="absolute flex h-20 w-20 items-center justify-center place-self-center"
+        >
+          <TailSpin class="h-16 w-16" />
+        </div>
       </div>
 
-      <div class="max-w-screen-sm flex flex-row gap-4 mt-4">
+      <div class="mt-4 flex max-w-screen-sm flex-row gap-4">
         <button
-          class="rounded-md border h-10 w-10 flex items-center justify-center disabled:pointer-events-none hover:bg-neutral-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="postsStore.page === 1"
+          class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="page === 1"
           @click="prevPage"
         >
           <IconChevronLeft />
@@ -90,8 +103,8 @@ const nextPage = () => {
           <button
             v-for="n in clickablePages"
             :key="'page:' + n"
-            :data-active="postsStore.page === n"
-            class="text-sm h-10 w-10 rounded-md border hover:bg-neutral-100 data-[active=true]:bg-black data-[active=true]:text-white data-[active=true]:border-black"
+            :data-active="page === n"
+            class="h-9 w-9 rounded-md border text-sm hover:bg-neutral-100 data-[active=true]:border-black data-[active=true]:bg-black data-[active=true]:text-white"
             @click="() => updatePage(n)"
           >
             {{ n }}
@@ -99,8 +112,8 @@ const nextPage = () => {
         </div>
 
         <button
-          class="rounded-md border h-10 w-10 flex items-center justify-center disabled:pointer-events-none hover:bg-neutral-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="postsStore.page === postsStore.posts.length"
+          class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="page === posts.length"
           @click="nextPage"
         >
           <IconChevronRight />
