@@ -14,6 +14,8 @@ const GET_DELAY = () => {
 };
 
 export const usePostsStore = defineStore("posts-store", () => {
+  const ordering = ref<"asc" | "desc">("asc");
+
   const underlyingPosts = ref<Post[]>([]);
   const posts = computed(() => {
     return chunkArray(underlyingPosts.value, POSTS_PER_PAGE);
@@ -28,7 +30,7 @@ export const usePostsStore = defineStore("posts-store", () => {
 
   const isFetching = ref<boolean>(false);
 
-  const orderById = async (order: "asc" | "desc" = "asc") => {
+  const orderById = async (newOrder: "asc" | "desc" = "asc") => {
     if (SIMULATE_DELAY === true) {
       isFetching.value = true;
       await sleep(GET_DELAY()).finally(() => {
@@ -36,43 +38,15 @@ export const usePostsStore = defineStore("posts-store", () => {
       });
     }
 
+    ordering.value = newOrder;
+
     underlyingPosts.value = underlyingPosts.value.toSorted((a, b) => {
-      if (order === "asc") {
+      if (newOrder === "asc") {
         return a.id - b.id;
       } else {
         return b.id - a.id;
       }
     });
-  };
-
-  const prevPage = async () => {
-    if (underlyingPage.value === 1) {
-      throw Error("reached first page");
-    }
-
-    if (SIMULATE_DELAY === true) {
-      isFetching.value = true;
-      await sleep(GET_DELAY()).finally(() => {
-        isFetching.value = false;
-      });
-    }
-
-    underlyingPage.value = underlyingPage.value - 1;
-  };
-
-  const nextPage = async () => {
-    if (underlyingPage.value === posts.value.length) {
-      throw Error("reached last page");
-    }
-
-    if (SIMULATE_DELAY === true) {
-      isFetching.value = true;
-      await sleep(GET_DELAY()).finally(() => {
-        isFetching.value = false;
-      });
-    }
-
-    underlyingPage.value = underlyingPage.value + 1;
   };
 
   const selectPage = async (pageNum: number) => {
@@ -102,6 +76,14 @@ export const usePostsStore = defineStore("posts-store", () => {
     underlyingPage.value = pageNum;
   };
 
+  const prevPage = async () => {
+    await selectPage(page.value - 1);
+  };
+
+  const nextPage = async () => {
+    await selectPage(page.value + 1);
+  };
+
   const getPosts = async () => {
     isFetching.value = true;
     const data = await $fetch("/api/posts", {
@@ -121,6 +103,7 @@ export const usePostsStore = defineStore("posts-store", () => {
     page,
     pagePosts,
     isFetching,
+    ordering,
     getPosts,
     orderById,
     nextPage,
