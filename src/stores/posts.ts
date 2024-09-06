@@ -28,7 +28,14 @@ export const usePostsStore = defineStore("posts-store", () => {
 
   const isFetching = ref<boolean>(false);
 
-  const orderById = (order: "asc" | "desc" = "asc") => {
+  const orderById = async (order: "asc" | "desc" = "asc") => {
+    if (SIMULATE_DELAY === true) {
+      isFetching.value = true;
+      await sleep(GET_DELAY()).finally(() => {
+        isFetching.value = false;
+      });
+    }
+
     underlyingPosts.value = underlyingPosts.value.toSorted((a, b) => {
       if (order === "asc") {
         return a.id - b.id;
