@@ -1,40 +1,36 @@
 <script setup lang="ts">
-import IconChevronLeft from "~/components/icons/mini/IconChevronLeft.vue";
-import IconChevronRight from "~/components/icons/mini/IconChevronRight.vue";
+import IconLongArrowDown from "~/components/icons/micro/IconLongArrowDown.vue";
+import IconLongArrowUp from "~/components/icons/micro/IconLongArrowUp.vue";
 import TailSpin from "~/components/icons/TailSpin.vue";
 import Main from "~/components/Main.vue";
-import { paginatorWindow } from "~/lib/paginator-window";
 
-const router = useRouter();
 const indicator = useLoadingIndicator();
-const pageQuery = usePageQuery();
 const postsStore = usePostsStore();
+const [pageQuery, setPageQuery] = usePageQuery();
+const [orderQuery, setOrderQuery] = useOrderQuery();
 
 await postsStore.getPosts();
+await postsStore.orderById(orderQuery);
 await postsStore.selectPage(pageQuery ?? 1);
 
-const { page, pagePosts, posts, isFetching } = storeToRefs(postsStore);
-
-const clickablePages = computed(() =>
-  paginatorWindow({
-    currentPage: page.value,
-    maxPage: posts.value.length,
-    windowSize: 5,
-  }),
-);
+const { page, pagePosts, posts, isFetching, ordering } = storeToRefs(postsStore);
 
 const updatePage = async (newPage: number) => {
   postsStore.selectPage(newPage).then(() => {
-    void router.push({ query: { page: newPage } });
+    setPageQuery(newPage);
   });
 };
 
-const prevPage = () => {
-  void updatePage(page.value - 1);
-};
-
-const nextPage = () => {
-  void updatePage(page.value + 1);
+const reorder = async () => {
+  if (ordering.value === "asc") {
+    postsStore.orderById("desc").then(() => {
+      setOrderQuery("desc");
+    });
+  } else {
+    postsStore.orderById("asc").then(() => {
+      setOrderQuery("asc");
+    });
+  }
 };
 
 watch(
@@ -56,10 +52,18 @@ watch(
         <table class="w-full caption-bottom overflow-hidden text-sm">
           <thead>
             <tr class="border-x border-black bg-black font-bold text-white transition-colors">
-              <th class="h-12 w-[90px] px-4 text-left align-middle">ID</th>
-              <th class="h-12 w-[90px] px-4 text-left align-middle">User ID</th>
-              <th class="h-12 w-[250px] px-4 text-left align-middle">Title</th>
-              <th class="h-12 px-4 text-left align-middle">Body</th>
+              <th
+                class="flex h-14 w-[90px] items-center gap-2 px-4 text-left align-middle text-base"
+              >
+                <span>ID</span>
+                <button class="rounded-md px-2 py-1 hover:bg-white/20" @click="reorder">
+                  <IconLongArrowUp v-if="ordering === 'asc'" />
+                  <IconLongArrowDown v-else />
+                </button>
+              </th>
+              <th class="h-14 w-[90px] px-4 text-left align-middle text-base">User ID</th>
+              <th class="h-14 w-[250px] px-4 text-left align-middle text-base">Title</th>
+              <th class="h-14 px-4 text-left align-middle text-base">Body</th>
             </tr>
           </thead>
           <tbody
@@ -90,35 +94,7 @@ watch(
         </div>
       </div>
 
-      <div class="mt-4 flex max-w-screen-sm flex-row gap-4">
-        <button
-          class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="page === 1"
-          @click="prevPage"
-        >
-          <IconChevronLeft />
-        </button>
-
-        <div class="flex flex-row gap-2">
-          <button
-            v-for="n in clickablePages"
-            :key="'page:' + n"
-            :data-active="page === n"
-            class="h-9 w-9 rounded-md border text-sm hover:bg-neutral-100 data-[active=true]:border-black data-[active=true]:bg-black data-[active=true]:text-white"
-            @click="() => updatePage(n)"
-          >
-            {{ n }}
-          </button>
-        </div>
-
-        <button
-          class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="page === posts.length"
-          @click="nextPage"
-        >
-          <IconChevronRight />
-        </button>
-      </div>
+      <Paginator :page="page" :max-page="posts.length" @goto="updatePage" />
     </div>
   </Main>
 </template>

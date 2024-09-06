@@ -1,11 +1,17 @@
 export const usePageQuery = () => {
-  const route = useRoute();
-  const page = route.query["page"];
+  const router = useRouter();
+  const { query } = useRoute();
+
+  const queriedNum = query["page"];
 
   let num: number | null = null;
-  if (typeof page === "string") {
-    num = Number(page);
+  if (typeof queriedNum === "string") {
+    num = Number(queriedNum);
   }
 
-  return num;
+  const setter = async (newPage: number) => {
+    return await router.push({ query: { ...query, page: newPage } });
+  };
+
+  return [num, setter] as const;
 };
