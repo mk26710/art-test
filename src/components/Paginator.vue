@@ -62,7 +62,7 @@ const selectPageByNumber = (newPage: number) => {
       </button>
 
       <button
-        class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+        class="hidden h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:flex"
         :disabled="page === 1"
         @click="selectPrevPage"
       >
@@ -84,7 +84,7 @@ const selectPageByNumber = (newPage: number) => {
 
     <div class="flex flex-row gap-1.5">
       <button
-        class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+        class="hidden h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:flex"
         :disabled="page === maxPage"
         @click="selectNextPage"
       >
