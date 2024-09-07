@@ -4,7 +4,7 @@ import Header from "~/components/Header.vue";
 useHead({
   title: "Posts Viewer",
   bodyAttrs: {
-    class: "bg-white",
+    class: "bg-background",
   },
   link: [
     { rel: "preconnect", href: "https://rsms.me/" },
