@@ -8,7 +8,10 @@ type Props = {
 const props = defineProps<Props>();
 const showModal = defineModel<boolean>({ required: true });
 
+const emit = defineEmits<{ close: [] }>();
+
 const handleClose = () => {
+  emit("close");
   showModal.value = false;
 };
 </script>
@@ -18,7 +21,7 @@ const handleClose = () => {
     <Transition name="modal">
       <div
         v-if="showModal === true"
-        class="bg-black/50 fixed left-0 top-0 z-[999] flex size-full flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+        class="fixed left-0 top-0 z-[999] flex size-full flex-col items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
         @click.self="handleClose"
       >
         <div :class="cn('transition-all', props.class)" @click.stop>
