@@ -16,6 +16,7 @@
     "nuxt": "^3.13.0",
     "pinia": "^2.2.2",
     "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
     "vue": "latest",
     "zod": "^3.23.8"
   },
