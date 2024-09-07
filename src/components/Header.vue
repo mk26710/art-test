@@ -9,22 +9,36 @@ import Label from "./ui/Label.vue";
 import P from "./ui/typography/P.vue";
 import H3 from "./ui/typography/H3.vue";
 
-const showNewPostModal = ref<boolean>(false);
+const indicator = useLoadingIndicator();
+const postsStore = usePostsStore();
 
+const showNewPostModal = ref<boolean>(false);
 const newPostFields = reactive({
   userId: "",
   title: "",
   body: "",
 });
 
-const newPostHandler = () => {
-  console.log(newPostFields);
+const resetNewPostFields = () => {
+  newPostFields.userId = "";
+  newPostFields.title = "";
+  newPostFields.body = "";
+};
+
+const newPostHandler = async () => {
+  const body = NewPostSchema.parse(newPostFields);
+
+  indicator.start();
+  postsStore
+    .createPost(body)
+    .then(() => (showNewPostModal.value = false))
+    .finally(() => indicator.finish());
 };
 </script>
 
 <template>
   <header
-    class="sticky top-0 z-50 box-border flex h-[var(--height-header)] items-center bg-black text-white shadow"
+    class="sticky top-0 z-50 box-border flex h-[var(--height-header)] items-center bg-background shadow"
   >
     <div class="container grid max-w-screen-lg grid-cols-2">
       <span class="flex flex-row items-center gap-2">
@@ -33,7 +47,7 @@ const newPostHandler = () => {
       </span>
 
       <div class="flex justify-end">
-        <Button variant="secondary" size="sm" @click="showNewPostModal = true">
+        <Button variant="ghost" size="sm" @click="showNewPostModal = true">
           <IconPlus />
           <span>New Post</span>
         </Button>
@@ -41,12 +55,12 @@ const newPostHandler = () => {
     </div>
   </header>
 
-  <Modal v-model="showNewPostModal" class="w-full max-w-3xl">
+  <Modal v-model="showNewPostModal" class="w-full max-w-3xl" @close="resetNewPostFields">
     <form
       class="flex w-full flex-col gap-4 rounded-md border border-border bg-background p-4 shadow-lg"
       @submit.prevent="newPostHandler"
     >
-      <div>
+      <div class="mb-6">
         <H3>New Post</H3>
         <P class="mt-0 text-muted-foreground">Fill out the form to create a new post</P>
       </div>
