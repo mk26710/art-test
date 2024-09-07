@@ -4,6 +4,7 @@ import IconChevronDoubleLeft from "./icons/mini/IconChevronDoubleLeft.vue";
 import IconChevronLeft from "./icons/mini/IconChevronLeft.vue";
 import IconChevronRight from "./icons/mini/IconChevronRight.vue";
 import IconChevronDoubleRight from "./icons/mini/IconChevronDoubleRight.vue";
+import Button from "./ui/Button.vue";
 
 type Props = {
   page: number;
@@ -53,51 +54,37 @@ const selectPageByNumber = (newPage: number) => {
 <template>
   <div class="mt-4 flex max-w-screen-sm flex-row gap-3">
     <div class="flex flex-row gap-1.5">
-      <button
-        class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="page === 1"
-        @click="selectFirstPage"
-      >
+      <Button size="icon" variant="outline" :disabled="page === 1" @click="selectFirstPage">
         <IconChevronDoubleLeft />
-      </button>
+      </Button>
 
-      <button
-        class="hidden h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:flex"
-        :disabled="page === 1"
-        @click="selectPrevPage"
-      >
+      <Button size="icon" variant="outline" :disabled="page === 1" @click="selectPrevPage">
         <IconChevronLeft />
-      </button>
+      </Button>
     </div>
 
     <div class="flex flex-row gap-1.5">
-      <button
+      <Button
         v-for="n in clickablePages"
         :key="'page:' + n"
         :data-active="page === n"
-        class="h-9 w-9 rounded-md border text-sm hover:bg-neutral-100 data-[active=true]:border-black data-[active=true]:bg-black data-[active=true]:text-white"
+        size="icon"
+        :variant="page === n ? 'default' : 'outline'"
+        class="transition-none"
         @click="() => selectPageByNumber(n)"
       >
         {{ n }}
-      </button>
+      </Button>
     </div>
 
     <div class="flex flex-row gap-1.5">
-      <button
-        class="hidden h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:flex"
-        :disabled="page === maxPage"
-        @click="selectNextPage"
-      >
+      <Button size="icon" variant="outline" :disabled="page === maxPage" @click="selectNextPage">
         <IconChevronRight />
-      </button>
+      </Button>
 
-      <button
-        class="flex h-9 w-9 items-center justify-center rounded-md border transition-all duration-200 hover:bg-neutral-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="page === maxPage"
-        @click="selectLastPage"
-      >
+      <Button size="icon" variant="outline" :disabled="page === maxPage" @click="selectLastPage">
         <IconChevronDoubleRight />
-      </button>
+      </Button>
     </div>
   </div>
 </template>
