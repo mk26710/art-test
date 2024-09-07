@@ -58,7 +58,13 @@ const selectPageByNumber = (newPage: number) => {
         <IconChevronDoubleLeft />
       </Button>
 
-      <Button size="icon" variant="outline" :disabled="page === 1" @click="selectPrevPage">
+      <Button
+        size="icon"
+        variant="outline"
+        class="hidden md:inline-flex"
+        :disabled="page === 1"
+        @click="selectPrevPage"
+      >
         <IconChevronLeft />
       </Button>
     </div>
@@ -78,7 +84,13 @@ const selectPageByNumber = (newPage: number) => {
     </div>
 
     <div class="flex flex-row gap-1.5">
-      <Button size="icon" variant="outline" :disabled="page === maxPage" @click="selectNextPage">
+      <Button
+        size="icon"
+        variant="outline"
+        class="hidden md:inline-flex"
+        :disabled="page === maxPage"
+        @click="selectNextPage"
+      >
         <IconChevronRight />
       </Button>
 
