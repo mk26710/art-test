@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { PostSchema, type Post } from "./posts.schema";
+import { PostSchema, type NewPost, type Post } from "./posts.schema";
 import { chunkArray } from "~/lib/chunk-array";
 import { sleep } from "~/lib/sleep";
 import { randomNumber } from "~/lib/random-number";
@@ -98,6 +98,21 @@ export const usePostsStore = defineStore("posts-store", () => {
     return result;
   };
 
+  const createPost = async (body: NewPost) => {
+    isFetching.value = true;
+    const res = await $fetch("/api/posts", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    }).finally(() => (isFetching.value = false));
+
+    const newPost = PostSchema.parse(res);
+
+    underlyingPosts.value = [...underlyingPosts.value, newPost];
+
+    return newPost;
+  };
+
   return {
     posts,
     page,
@@ -105,6 +120,7 @@ export const usePostsStore = defineStore("posts-store", () => {
     isFetching,
     ordering,
     getPosts,
+    createPost,
     orderById,
     nextPage,
     prevPage,
